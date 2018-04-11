@@ -1,0 +1,2 @@
+pytest==3.5.0
+pywinauto==0.6.4
