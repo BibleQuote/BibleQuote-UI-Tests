@@ -1,33 +1,41 @@
 # -*- coding: utf-8 -*-
 
 from pywinauto.application import Application
+import pytest
 import time
 
-app = Application().Start(cmd_line=u'C:\Projects\BibleQuote\Source\Output\BibleQuote.exe')
-tmainform = app.TMainForm
-tmainform.Wait('ready')
+def BQApp():
+    '''Runs an aplication instance'''
+    return Application().Start(cmd_line=u'C:\Projects\BibleQuote\Source\Output\BibleQuote.exe')
 
-time.sleep(3)
+def MainForm(app):
+    '''Sets focus on the main window'''
+    tmainform = app.TMainForm
+    tmainform.Wait('ready')
+    return tmainform
 
-tedit = tmainform[u'5']
-tedit.ClickInput()
+app = BQApp()
 
-tmainform.Edit.set_edit_text(u'Mk 1:2')
+mainForm = MainForm(app)
 
-tbutton2 = tmainform.OK
-tbutton2.Click()
+def test_change_app_language():
+    """File->Print"""
+    menu_item = mainForm.MenuItem(u'View->Interface language->#0', app)
+    menu_item.Click()
 
-time.sleep(3)
+def test_print_function():
+    """File->Print"""
+    menu_item = mainForm.MenuItem(u'File->#0', app)
+    menu_item.Click()
+    window = app.Print
+    window.Wait('ready')
+    button = window.Cancel
+    button.Click()
 
-"""File->Print"""
-menu_item = tmainform.MenuItem(u'File->#0', app)
-menu_item.Click()
+def test_search_bible_text():
+    mainForm.Edit.set_edit_text(u'Mk 1:2')
+    tbutton2 = mainForm.OK
+    tbutton2.Click()
 
-window = app.Print
-window.Wait('ready')
-button = window.Cancel
-button.Click()
-
-time.sleep(3)
-
-app.Kill_()
+def test_stop_app():
+    app.Kill_()
