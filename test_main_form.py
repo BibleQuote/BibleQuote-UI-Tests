@@ -23,9 +23,7 @@ def change_app_language():
 ''' ========== Run app ========== '''
 
 app = BQApp()
-
 tmainform = MainForm(app)
-
 change_app_language()
 
 

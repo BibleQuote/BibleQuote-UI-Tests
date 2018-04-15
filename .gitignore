@@ -3,6 +3,7 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+<<<<<<< HEAD
 # C extensions
 *.so
 
@@ -105,3 +106,7 @@ ENV/
 
 # Visual Studio Code
 .vscode
+=======
+# pytest Cache
+.pytest_cache/
+>>>>>>> upstream/master
