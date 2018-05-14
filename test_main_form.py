@@ -4,73 +4,66 @@ from pywinauto.application import Application
 import pytest
 import time
 
-def BQApp():
-    '''Run an aplication instance'''
-    return Application().Start(cmd_line=u'D:\\Projects\\BibleQuote\\Output\\BibleQuote.exe')
+class TestBibleQuoteApp:
+    
+    def setup_class(self):
+        '''Run an aplication instance'''
+        app = Application()
+        self.app = app.start('D:\\Projects\\BibleQuote\\Output\\BibleQuote.exe')
+        self.dlg = self.app.TMainForm
+        menu_item = self.dlg.MenuItem(u'#1->#2->#1')
+        menu_item.click()
 
-def MainForm(app):
-    '''Set focus on the main window'''
-    tmainform = app.TMainForm
-    tmainform.Wait('ready')
-    return tmainform
+    def teardown_class(self):
+        '''Close the application after tests'''
+        self.app.kill_()
 
-def change_app_language():
-    '''Change app language to English
-    File->Interface language->English'''
-    menu_item = tmainform.MenuItem(u'#1->#2->#1', app)
-    menu_item.Click()
+    ''' ========== Test dialog windows ========== '''
 
-''' ========== Run app ========== '''
+    def test_print_function(self):
+        '''File->Print'''
+        menu_item = self.dlg.MenuItem(u'File->#0', self.app)
+        menu_item.click()
+        window = self.app.PrintDialog
+        window.wait('visible')
+        assert self.dlg.IsEnabled() == False
+        assert window.Texts()[0] == u'Print'
+        assert window.Printer.Texts()[0] == u'Printer'
+        window.Cancel.click()
 
-app = BQApp()
-tmainform = MainForm(app)
-change_app_language()
+    def test_about_popup_window(self):
+        '''Help->About this programm'''
+        menu_item = self.dlg.MenuItem(u'Help->#3', self.app)
+        menu_item.click()
+        window = self.app.About
+        window.wait('visible')
+        assert self.dlg.IsEnabled() == False
+        assert window.Texts()[0] == u'About'
+        assert '6.0.20120312 (12.03.2012) BETA' in window.Edit.Texts()[0]
+        window.OK.click()
 
+    def test_settings(self):
+        '''File->Options'''
+        menu_item = self.dlg.MenuItem(u'File->#5', self.app)
+        menu_item.click()
+        window = self.app.Parameters
+        window.wait('visible')
+        time.sleep(3)
+        window.OK.click()
 
-''' ========== Test dialog windows ========== '''
+    ''' ========== Test main window ========== '''
 
-def test_print_function():
-    '''File->Print'''
-    menu_item = tmainform.MenuItem(u'File->#0')
-    menu_item.Click()
-    window = app.PrintDialog
-    window.Wait('ready')
-    assert tmainform.IsEnabled() == False
-    assert window.Texts()[0] == u'Print'
-    assert window.Printer.Texts()[0] == u'Printer'
-    window.Cancel.Click()
+    def test_search_bible_text(self):
+        self.dlg.Edit.set_edit_text(u'Mk 1:2')
+        tbutton2 = self.dlg.OK
+        tbutton2.click()
 
-def test_about_popup_window():
-    '''Help->About this programm'''
-    menu_item = tmainform.MenuItem(u'Help->#3')
-    menu_item.Click()
-    window = app.About
-    window.Wait('ready')
-    assert tmainform.IsEnabled() == False
-    assert window.Texts()[0] == u'About'
-    assert '6.0.20120312 (12.03.2012) BETA' in window.Edit.Texts()[0]
-    window.OK.Click()
-
-
-''' ========== Test main window ========== '''
-
-def test_search_bible_text():
-    tmainform.Edit.set_edit_text(u'Mk 1:2')
-    tbutton2 = tmainform.OK
-    tbutton2.Click()
-
-def test_change_view():
-    '''Togle left Panel'''
-    assert tmainform.TPageControl.IsEnabled() == True
-    assert tmainform.TPageControl.IsVisible() == True
-    tmainform[u'3'].Click()
-    time.sleep(3)
-    assert tmainform.TPageControl.IsEnabled() == True
-    assert tmainform.TPageControl.IsVisible() == True
-    tmainform[u'3'].Click()
-
-
-''' ========== Close app window ========== '''
-
-def test_stop_app():
-    app.Kill_()
+    def test_change_view(self):
+        '''Togle left Panel'''
+        assert self.dlg.TPageControl.IsEnabled() == True
+        assert self.dlg.TPageControl.IsVisible() == True
+        self.dlg.TToolBar2.click()
+        time.sleep(3)
+        assert self.dlg.TPageControl.IsEnabled() == True
+        assert self.dlg.TPageControl.IsVisible() == True
+        self.dlg.TToolBar2.click()
